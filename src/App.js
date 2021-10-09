@@ -13,12 +13,10 @@ function App() {
         {/* Định tuyến */}
         <Switch>
           {routes.map((item, index) => {
-            console.log(item)
             return (
               <MyRoute key={index} path={item.path} component={item.component} />
             )
           })}
-})}
         </Switch>
       </BrowserRouter>
     </div>
