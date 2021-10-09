@@ -16,13 +16,25 @@ const initData = [
         "id": 2,
         "name": "Học React Hooks - useContext",
         "isCompleted": false,
-        "deadline": '2021-10-13'
+        "deadline": '2021-10-11'
     },
     {
         "id": 3,
         "name": "Học React Hooks - useState",
         "isCompleted": true,
-        "deadline": '2021-10-09'
+        "deadline": '2021-10-12'
+    },
+    {
+        "id": 4,
+        "name": "FastAPI Basic",
+        "isCompleted": false,
+        "deadline": '2021-10-17'
+    },
+    {
+        "id": 5,
+        "name": "Material UI",
+        "isCompleted": true,
+        "deadline": '2021-10-19'
     }
 ];
 

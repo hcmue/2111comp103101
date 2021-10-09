@@ -1,34 +1,43 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import { TodoContext } from '../context/TodoContext';
-import { VerticalTimeline, VerticalTimelineElement, WorkIcon, SchoolIcon, StarIcon } from 'react-horizontal-timeline';
+import { VerticalTimeline, VerticalTimelineElement } from 'react-vertical-timeline-component';
 import 'react-vertical-timeline-component/style.min.css';
-import HorizontalTimeline from 'react-horizontal-timeline';
-import * as R from 'ramda';
+import { ReactComponent as WorkIcon } from "./work.svg";
+import { ReactComponent as SchoolIcon } from "./school.svg";
 
 export function TodoAppTimeline() {
     const { data } = useContext(TodoContext);
-    const VALUES = [];
-    data.forEach((item) => {
-        VALUES.push(R.prop('deadline', item));
-    });
-    console.log(VALUES);
-    const [state, setState] = useState({ value: 0, previous: 0 });
+
     return (
-        <div>
-            <div>react-horizontal-timeline: TEST</div>
-            <div>HorizontalTimeline</div>
-            <div style={{ width: '60%', height: '100px', margin: '0 auto' }}>
-                <HorizontalTimeline
-                    index={state.value}
-                    indexClick={(index) => {
-                        setState({
-                            ...state,
-                            value: index,
-                            previous: state.value
-                        });
-                    }}
-                    values={VALUES} />
-            </div>
+        <div style={{ backgroundColor: '#3da3d5' }}>
+            <h2>TODO App Timeline</h2>
+            <VerticalTimeline>
+                {data.map((item) => {
+                    return (
+                        <VerticalTimelineElement
+                            key={item.id}
+                            date={item.deadline}
+                            className="vertical-timeline-element--work"
+                            iconStyle={{ background: "rgb(33, 150, 243)", color: "#fff" }}
+                            contentStyle={{ color: "rgb(33, 150, 243)", background: "#fff" }}
+                            contentArrowStyle={{ borderRight: "7px solid  rgb(33, 150, 243)" }}
+                            icon={item.isCompleted ? <SchoolIcon /> : <WorkIcon />}
+                        >
+                            <h3 className="vertical-timeline-element-title">
+                                {item.name}
+                            </h3>
+                            <h5 className="vertical-timeline-element-subtitle">
+                                {item.deadline}
+                            </h5>
+                            {!item.isCompleted && (
+                                <button style={{ padding: 9, margin: 3, backgroundColor: '#06d6a0', color: 'white' }}>
+                                    Complete
+                                </button>
+                            )}
+                        </VerticalTimelineElement>
+                    )
+                })}
+            </VerticalTimeline>
         </div>
     );
 };

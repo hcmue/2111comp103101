@@ -10,7 +10,7 @@ export const MenuNgang = () => {
             <Link to="/about" className="menuItem">About</Link>
             <Link to="/todo" className="menuItem">TODO List</Link> */}
             {routes.map((item) => (
-                <Link to={item.path} className="menuItem">{item.label}</Link>
+                <Link key={item.path} to={item.path} className="menuItem">{item.label}</Link>
             ))}
         </div>
     )

@@ -31,7 +31,7 @@ export const Counter = () => {
     useEffect(() => {
         console.log('Counter change');
         setCount(counter);
-    }, [counter]);
+    }, [counter, setCount]);
 
     return (
         <>
