@@ -4,6 +4,7 @@ import { NotFound } from '../components/NotFound';
 import { Comment } from '../components/Comment';
 import { Counter } from '../components/Counter';
 import { SignInForm } from '../components/SignIn';
+import { TodoAppTimeline } from '../components/TodoAppTimeline';
 
 export const routes = [
     // {
@@ -11,6 +12,11 @@ export const routes = [
     //     // component: NotFound,
     //     label: "Home"
     // },
+    {
+        path: "/timeline",
+        component: TodoAppTimeline,
+        label: "Timeline"
+    },
     {
         path: "/about",
         component: About,
