@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
+import { MyContext } from '../context/MyContext';
 
 export const Counter = () => {
     const [counter, setCounter] = useState(0);
     const decrease = () => {
         setCounter(counter - 1);
     };
+    const { count, setCount } = useContext(MyContext);
 
     // No dependency ==> Always called : Luôn được gọi khi thay đổi state
     useEffect(() => {
@@ -28,11 +30,13 @@ export const Counter = () => {
     // Theo state
     useEffect(() => {
         console.log('Counter change');
+        setCount(counter);
     }, [counter]);
 
     return (
         <>
             <h2>COUNTER - Value: {counter}</h2>
+            <h3>COUNT (context): {count}</h3>
             <div>
                 <button onClick={() => {
                     setCounter(counter + 1);
