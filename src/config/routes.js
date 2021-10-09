@@ -3,6 +3,7 @@ import { ToDoList } from '../components/Todo';
 import { NotFound } from '../components/NotFound';
 import { Comment } from '../components/Comment';
 import { Counter } from '../components/Counter';
+import { SignInForm } from '../components/SignIn';
 
 export const routes = [
     // {
@@ -29,6 +30,11 @@ export const routes = [
         path: "/counter",
         component: Counter,
         label: "My Counter"
+    },
+    {
+        path: "/signin",
+        component: SignInForm,
+        label: "SIGN IN"
     },
     {
         path: "*",
