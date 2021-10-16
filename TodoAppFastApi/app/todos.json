@@ -1,13 +1,20 @@
 [
-  {
-    "id": "3a919264-8c37-474c-9ada-d729346c65d9",
-    "name": "ReactJs",
-    "noted": "Ongoing",
-    "is_completed": false
-  },
-  {
-    "id": "3a919264-8c37-474c-9ada-d729346c65d0",
-    "name": "ReactJs",
-    "is_completed": true
-  }
+    {
+        "id": "3a919264-8c37-474c-9ada-d729346c65d9",
+        "name": "ReactJs",
+        "noted": "Ongoing",
+        "is_completed": false
+    },
+    {
+        "name": "FastAPI - Build APIs very simple",
+        "noted": "\u0110\u00e3 check",
+        "is_completed": true,
+        "id": "13b683e6-4cfe-4f7f-aea9-3f77bf068b72"
+    },
+    {
+        "name": "JSON format very hardly",
+        "noted": "check validation",
+        "is_completed": false,
+        "id": "d0fa92e5-9c1c-4b4d-a5c3-bd4b68ad83de"
+    }
 ]
