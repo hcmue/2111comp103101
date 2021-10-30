@@ -6,6 +6,7 @@ from pydantic import BaseModel
 import logging
 from .db.database import engine, Base, LocalSession
 from .db.user import User
+from .db.hanghoa import Loai, HangHoa
 from .models import user_model
 
 Base.metadata.create_all(bind=engine)
@@ -137,3 +138,17 @@ def get_all_user(id: int):
     user = session.query(User).filter(User.id == id).delete()
     session.commit()
     return user
+
+
+@app.get("/loais")
+def get_all_category():
+    session = LocalSession()
+    loais = session.query(Loai).all()
+    result = []
+    for item in loais:
+        result.append({
+            "ma": item.ma_loai,
+            "ten": item.ten_loai,
+            "hanghoa": item.hanghoas
+        })
+    return result
