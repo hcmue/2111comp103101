@@ -4,6 +4,11 @@ import os
 import shutil
 from pydantic import BaseModel
 import logging
+from .db.database import engine, Base, LocalSession
+from .db.user import User
+from .models import user_model
+
+Base.metadata.create_all(bind=engine)
 
 
 app = FastAPI()
@@ -96,3 +101,39 @@ def upload_multiple_file(images: List[UploadFile] = File(...)):
     except Exception as e:
         print(e)
         return {"success": False}
+
+
+@app.get("/users")
+def get_all_user():
+    session = LocalSession()
+    users = session.query(User).all()
+    return users
+
+
+@app.get("/users/{id}")
+def get_all_user(id: int):
+    session = LocalSession()
+    user = session.query(User).filter(User.id == id).one_or_none()
+    if user:
+        return user
+    else:
+        raise HTTPException(status_code=404, detail="Not found")
+
+
+@app.post("/users")
+def create_new_user(model: user_model.UserModel):
+    new_user = User(name=model.name, username=model.username,email=model.email)
+    session = LocalSession()
+    session.add(new_user)
+    session.commit()
+    session.refresh(new_user)
+
+    return new_user
+
+
+@app.delete("/users/{id}")
+def get_all_user(id: int):
+    session = LocalSession()
+    user = session.query(User).filter(User.id == id).delete()
+    session.commit()
+    return user
