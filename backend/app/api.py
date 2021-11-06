@@ -1,7 +1,10 @@
 from typing import List, Optional
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Depends, status
 import os
 import shutil
+from datetime import datetime, timedelta
+from jose import JWTError, jwt
+from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 import logging
 from .db.database import engine, Base, LocalSession
@@ -29,12 +32,63 @@ class HangHoa(BaseModel):
     DonGia: float
 
 
-@ app.get("/")
+@app.get("/")
 def read_root():
     return {"Hello": "World"}
 
+# openssl rand -hex 32
+SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
+ALGORITHM = "HS512" # SHA-512
+ACCESS_TOKEN_EXPIRE_MINUTES = 5
 
-@ app.get("/products/{id}")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=15)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+
+def get_current_user(token: str = Depends(oauth2_scheme)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Unauthorize",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("username")
+        if username is None:
+            raise credentials_exception
+        else:
+            return username
+    except JWTError:
+        raise credentials_exception
+
+
+@app.post("/login", tags=["Authen"])
+def validate_user(model: user_model.LoginModel):
+    session = LocalSession()
+    user = session.query(User).filter(User.username == model.username).one_or_none()
+    if user:
+        # Generate token
+        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = create_access_token(
+            data={"username": model.username, "name": user.name, "email": user.email},
+            expires_delta=access_token_expires
+        )
+        return {"success": True, "data": access_token}
+    else:
+        return {"success": False, "message": "Invalid username/password"}
+
+
+@app.get("/products/{id}", tags=["PRODUCT"])
 def read_product_data(id: int):
     if id < 1:
         raise HTTPException(status_code=404, detail=f"Not found {id}")
@@ -44,7 +98,7 @@ def read_product_data(id: int):
 DIRECTORY = os.getcwd()
 
 
-@ app.post("/products", tags=["PRODUCT"])
+@app.post("/products", tags=["PRODUCT"])
 def upload_new_product(ten_hh: str, gia: float, mo_ta: Optional[str], image: UploadFile = File(...)):
     try:
         new_file_name = f"{ten_hh}_{image.filename}"
@@ -58,7 +112,7 @@ def upload_new_product(ten_hh: str, gia: float, mo_ta: Optional[str], image: Upl
         return HTTPException(status_code=500, detail="Server error")
 
 
-@ app.post("/predict", tags=["PREDICT"])
+@app.post("/predict", tags=["PREDICT"])
 def upload_and_predict_single_file(model_name: str, image: UploadFile = File(...)):
     logging.info("UPLOAD FILE")
     logging.error("CO LOI ROI")
@@ -75,7 +129,7 @@ def upload_and_predict_single_file(model_name: str, image: UploadFile = File(...
         return {"success": False}
 
 
-@ app.post("/images", tags=["UPLOAD"])
+@app.post("/images", tags=["UPLOAD"])
 def upload_single_file(image: UploadFile = File(...)):
     try:
         file_save = os.path.join(DIRECTORY, "data", image.filename)
@@ -88,7 +142,7 @@ def upload_single_file(image: UploadFile = File(...)):
         return {"success": False}
 
 
-@ app.post("/images/multiple", tags=["UPLOAD"])
+@app.post("/images/multiple", tags=["UPLOAD"])
 def upload_multiple_file(images: List[UploadFile] = File(...)):
     try:
         uploaded_files = []
@@ -133,14 +187,14 @@ def create_new_user(model: user_model.UserModel):
 
 
 @app.delete("/users/{id}")
-def get_all_user(id: int):
+def remove_user(id: int, current_user: User = Depends(get_current_user)):
     session = LocalSession()
     user = session.query(User).filter(User.id == id).delete()
     session.commit()
     return user
 
 
-@app.get("/loais")
+@app.get("/loais", tags= ["CATEGORY"])
 def get_all_category():
     session = LocalSession()
     loais = session.query(Loai).all()
