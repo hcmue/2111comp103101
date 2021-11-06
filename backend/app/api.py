@@ -5,6 +5,7 @@ import shutil
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from fastapi.security import OAuth2PasswordBearer
+from passlib.context import CryptContext
 from pydantic import BaseModel
 import logging
 from .db.database import engine, Base, LocalSession
@@ -41,7 +42,16 @@ SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
 ALGORITHM = "HS512" # SHA-512
 ACCESS_TOKEN_EXPIRE_MINUTES = 5
 
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+
+def get_password_hash(password):
+    return pwd_context.hash(password)
+
+
+def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
@@ -75,8 +85,10 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
 @app.post("/login", tags=["Authen"])
 def validate_user(model: user_model.LoginModel):
     session = LocalSession()
-    user = session.query(User).filter(User.username == model.username).one_or_none()
-    if user:
+    user = session.query(User)\
+        .filter(User.username == model.username)\
+        .one_or_none()
+    if user and verify_password(model.password, user.password):
         # Generate token
         access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         access_token = create_access_token(
@@ -177,7 +189,12 @@ def get_all_user(id: int):
 
 @app.post("/users")
 def create_new_user(model: user_model.UserModel):
-    new_user = User(name=model.name, username=model.username,email=model.email)
+    new_user = User(
+        name=model.name,
+        username=model.username,
+        password=get_password_hash(model.password),
+        email=model.email
+    )
     session = LocalSession()
     session.add(new_user)
     session.commit()
