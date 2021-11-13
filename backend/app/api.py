@@ -9,6 +9,7 @@ from passlib.context import CryptContext
 from pydantic import BaseModel
 import logging
 from .db.database import engine, Base, LocalSession
+from fastapi.middleware.cors import CORSMiddleware
 from .db.user import User
 from .db.hanghoa import Loai, HangHoa
 from .models import user_model
@@ -17,6 +18,16 @@ Base.metadata.create_all(bind=engine)
 
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
 # logging = logging.getLogger()
 logging.basicConfig(
     level=logging.INFO,
@@ -37,9 +48,10 @@ class HangHoa(BaseModel):
 def read_root():
     return {"Hello": "World"}
 
+
 # openssl rand -hex 32
 SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
-ALGORITHM = "HS512" # SHA-512
+ALGORITHM = "HS512"  # SHA-512
 ACCESS_TOKEN_EXPIRE_MINUTES = 5
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -92,7 +104,8 @@ def validate_user(model: user_model.LoginModel):
         # Generate token
         access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         access_token = create_access_token(
-            data={"username": model.username, "name": user.name, "email": user.email},
+            data={"username": model.username,
+                  "name": user.name, "email": user.email},
             expires_delta=access_token_expires
         )
         return {"success": True, "data": access_token}
@@ -211,7 +224,7 @@ def remove_user(id: int, current_user: User = Depends(get_current_user)):
     return user
 
 
-@app.get("/loais", tags= ["CATEGORY"])
+@app.get("/loais", tags=["CATEGORY"])
 def get_all_category():
     session = LocalSession()
     loais = session.query(Loai).all()
