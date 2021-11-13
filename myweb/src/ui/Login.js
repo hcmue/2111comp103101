@@ -16,8 +16,6 @@ export const Login = () => {
         }).then(function (response) {
             if (response.status === 200) {
                 if (response.data.success) {
-                    alert('Thành công');
-
                     //dispatch action để update store
                     dispatch(actLoginSuccess(username, response.data.data));
 
